@@ -1,0 +1,10 @@
+[
+  {
+    "provider": "IB",
+    "HKD": {"rate_pct": 1.971, "zero_interest_up_to": 78000.0},
+    "USD": {"rate_pct": 3.38, "zero_interest_up_to": 10000.0},
+    "source_url": "https://www.interactivebrokers.com/en/accounts/fees/pricing-interest-rates.php",
+    "fetched_at": "2026-11-24T19:00:00",
+    "note": "Typed in by hand from IBKR's interest-rate page (IBKR Pro, NAV above USD 100k). USD 3.38% was checked on IBKR's page (rates as of 18 Sep 2026). HKD 1.971% is the week 5 class figure. Check both before the demo and change fetched_at when you do."
+  }
+]

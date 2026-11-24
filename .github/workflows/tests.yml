@@ -1,0 +1,24 @@
+# Runs every member's tests on each pull request into main (INTERFACES.md, section 7).
+# A green tick on the pull request = safe to review and merge.
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install packages
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pandas requests beautifulsoup4 matplotlib reportlab
+      - name: Run every member's tests
+        run: python integration_check.py
