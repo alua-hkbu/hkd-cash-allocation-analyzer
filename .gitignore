@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- project (Member 5) ---
+email_config.json
+output/
+data/_selftest.db
+data/_test_part5/
+hsbc_dump.html

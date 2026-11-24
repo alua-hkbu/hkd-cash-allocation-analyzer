@@ -1,0 +1,59 @@
+# Runs the daily email report on GitHub's computers, so no laptop has to be on.
+# Setup: see TEAM_GUIDE.md, "Option B". The Gmail details are GitHub secrets,
+# never written in this file.
+name: Daily HK$100k report
+
+on:
+  schedule:
+    - cron: "0 0 * * *"        # 00:00 UTC = 08:00 Hong Kong (GitHub may start it up to ~1 hour late)
+  workflow_dispatch:            # the "Run workflow" button: anyone in the team can send one now
+
+permissions:
+  contents: write               # lets the job save the updated database and history back to the repo
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install packages
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pandas requests beautifulsoup4 matplotlib reportlab
+
+      - name: Run every member's tests first
+        run: python integration_check.py
+
+      - name: Build and send the report
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          if [ -z "$EMAIL_PASSWORD" ]; then
+            echo "No EMAIL_PASSWORD secret yet: building the report without sending (see TEAM_GUIDE.md)"
+            python email_report.py --dry-run
+          else
+            python email_report.py --send
+          fi
+
+      - name: Keep the PDF and email files (Actions tab -> this run -> Artifacts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: output/
+
+      - name: Save today's FX data and ranking history back to the repo
+        if: always()
+        run: |
+          git config user.name "daily-report-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/market_data.db data/rankings_history.csv || true
+          git diff --cached --quiet || git commit -m "Daily data $(date -u +%F)"
+          git push
