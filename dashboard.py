@@ -6,12 +6,38 @@ Member 5's rankings_history.csv is not used. The charts read Member 2's
 FX and Treasury database (get_daily_dataset).
 """
 
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from live_ranking import BROKER_RATES, DB_PATH, load_bank_rows as fetch_bank_rows
+from bank_data import (
+    fetch_bea,
+    fetch_elebank,
+    fetch_hsbc,
+    fetch_mox,
+    fetch_sc,
+    now_text,
+    parse_bea,
+    parse_elebank,
+    parse_hsbc,
+    parse_mox,
+    parse_sc,
+)
 from market_and_returns import get_daily_dataset, get_market_inputs, get_ranking, update
+
+ROOT = Path(__file__).resolve().parent
+DB_PATH = ROOT / "data" / "market_data.db"
+BROKER_RATES = []
+
+SOURCES = [
+    ("eleBank", fetch_elebank, parse_elebank),
+    ("HSBC", fetch_hsbc, parse_hsbc),
+    ("Standard Chartered", fetch_sc, parse_sc),
+    ("BEA", fetch_bea, parse_bea),
+    ("Mox", fetch_mox, parse_mox),
+]
 
 DISPLAY_COLUMNS = [
     "rank", "option", "provider", "currency", "rate_pct",
