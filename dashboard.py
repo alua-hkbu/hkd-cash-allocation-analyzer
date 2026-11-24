@@ -60,8 +60,24 @@ COLUMN_NAMES = {
 
 @st.cache_data(ttl=30 * 60, show_spinner=False)
 def load_bank_rows():
-    """Same bank load Member 5 uses in live_ranking.py. Cached for 30 minutes."""
-    return fetch_bank_rows()
+    """Call Member 1's fetch/parse functions. Return (rows, failed bank names)."""
+    fetched_at = now_text()
+    rows = []
+    failed = []
+    for name, fetch, parse in SOURCES:
+        try:
+            raw = fetch()
+            if raw is None:
+                failed.append(name)
+                continue
+            parsed = parse(raw, fetched_at)
+            if not parsed:
+                failed.append(f"{name} (page loaded, but no HKD/USD rows)")
+                continue
+            rows.extend(parsed)
+        except Exception as exc:
+            failed.append(f"{name} ({exc})")
+    return rows, failed
 
 
 def market_chart(daily):
