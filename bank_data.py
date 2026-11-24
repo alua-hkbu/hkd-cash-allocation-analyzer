@@ -220,7 +220,7 @@ def parse_hsbc(html, fetched_at):
             rows = rows + rows_from_wide_table(element, "HSBC", current_currency, "standard",
                                                "for indication only", HSBC_URL, fetched_at, None,
                                                "deposit period")
-            return rows
+    return rows
 
 
 # ---------- Standard Chartered (HTML tables, board rates) ----------
