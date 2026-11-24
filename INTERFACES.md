@@ -1,7 +1,7 @@
 # How our modules connect — "Where should HK$100k sit?"
 
 Agree this file **before** writing more code. If you need to change a format,
-change it here first, tell the group, and update `fixtures/`. Then run
+change it here first, tell the group, and update the tests that use it. Then run
 `python integration_check.py`.
 
 ```
@@ -52,7 +52,7 @@ Every morning, before ranking: `python market_and_returns.py update`. Before eve
 | source_url, source_type | str | `"json"` / `"html"` | |
 | fetched_at | str | `"2026-11-21T08:00:00"` | |
 
-**When loading from CSV**, convert `tenor_months`, `rate_pct` and `min_amount` to float, and an empty `min_amount` to `None`. A CSV gives back only text; `integration_check.py` shows how.
+**When loading from CSV**, convert `tenor_months`, `rate_pct` and `min_amount` to float, and an empty `min_amount` to `None`. A CSV gives back only text; `read_bank_csv()` in `market_and_returns.py` shows how.
 
 ## 2. Member 1 → `broker_rates` (IB cash)
 
@@ -71,7 +71,7 @@ Proposed owner: Member 1, using the week 5 `ib_rate()` scraper. **Please confirm
 
 `get_latest_fx()` returns `{"date": "2026-11-20", "base": "USD", "quote": "HKD", "rate": 7.7791}`, or `None` if the database is empty.
 
-`fx_from_module2()` in `returns.py` turns it into what `compare_options` reads:
+`fx_from_module2()` in `market_and_returns.py` turns it into what `compare_options` reads:
 
 ```python
 {"pair": "USD/HKD", "mid": 7.7791, "date": "2026-11-20", "source": "frankfurter (Module 2)"}
@@ -119,7 +119,7 @@ Empty values are `NaN` in the DataFrame (pandas turns `None` into `NaN`). Check 
 
 **Gap over time:** Member 5's daily job appends each day's table to `data/rankings_history.csv`, with the run date. Member 4's Plotly chart reads that file. Bank rates have no history before we start collecting, so start the job early.
 
-## 6. Shared assumptions (in `returns.py`, one place only)
+## 6. Shared assumptions (in `market_and_returns.py`, one place only)
 
 | assumption | value | source |
 |---|---|---|
@@ -134,6 +134,6 @@ Empty values are `NaN` in the DataFrame (pandas turns `None` into `NaN`). Check 
 
 1. One branch per module, with a pull request into `main`. Someone else reviews every pull request.
 2. **Before** opening a pull request, run your own tests **and** `python integration_check.py`.
-3. A format change updates this file, `fixtures/` and the tests in the **same** pull request.
+3. A format change updates this file and the tests in the **same** pull request.
 4. Never commit `.env` or keys: add `.env` to `.gitignore` on day 1 (week 6).
 5. Each module has its own tests with `assert` on saved inputs, including at least one number checked by hand.
